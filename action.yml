@@ -24,11 +24,11 @@ inputs:
       description: |-
         Additional versions of Rust to install, separated by spaces. Example: `1.75 1.79`.
 
-    use-cache:
-      default: "true"
+    certora-sbf-version:
       required: false
+      default: ""
       description: |-
-        Whether to use the cache for Rust toolchains and Cargo packages. If set to `false`, the cache will not be used.
+        The version of `cargo-certora-sbf` to install. If not specified, the latest version will be used.
 
     certora-sbf-options:
       required: false
@@ -42,7 +42,6 @@ runs:
   using: composite
   steps:
     - uses: actions/cache@v4
-      if: ${{ inputs.use-cache == 'true' }}
       with:
         path: |
           ~/.cargo/bin/
@@ -62,8 +61,14 @@ runs:
 
         . "$HOME/.cargo/env"
 
+        if [ -n '${{ inputs.certora-sbf-version }}' ]; then
+          CERTORA_SBF_NAME="cargo-certora-sbf@${{ inputs.certora-sbf-version }}"
+        else
+          CERTORA_SBF_NAME="cargo-certora-sbf"
+        fi
+
         rustup toolchain install '${{ inputs.version }}' --profile minimal
-        cargo '+${{ inputs.version }}' install --list | grep -q cargo-certora-sbf || cargo '+${{ inputs.version }}' install cargo-certora-sbf
+        cargo '+${{ inputs.version }}' install --list | grep -q cargo-certora-sbf || cargo '+${{ inputs.version }}' install "${CERTORA_SBF_NAME}"
 
         if [ -n '${{ inputs.additional-versions }}' ]; then
           rustup toolchain install "${{ inputs.additional-versions }}" --profile minimal
