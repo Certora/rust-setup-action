@@ -61,6 +61,8 @@ runs:
         fi
 
         rustup toolchain install '${{ inputs.version }}' --profile minimal
+        rustup default '${{ inputs.version }}'
+
         cargo '+${{ inputs.version }}' install --list | grep -q cargo-certora-sbf || cargo '+${{ inputs.version }}' install "${CERTORA_SBF_NAME}"
 
         if [ -n '${{ inputs.additional-versions }}' ]; then
