@@ -1,0 +1,78 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/SchemaStore/schemastore/refs/heads/master/src/schemas/json/github-action.json
+name: Certora Rust Setup Action
+description: |-
+  This GitHub Action sets up the Rust toolchain and installs the `cargo-certora-sbf` tool.
+  It allows you to specify the Rust version, additional versions, and options for the Certora SBF tool.
+  For more information, see https://github.com/Certora/cargo-certora-sbf and
+  https://docs.certora.com/en/latest/docs/solana/installation.html.
+
+branding:
+  color: blue
+  icon: cloud-lightning
+
+inputs:
+  version:
+    required: false
+    default: "stable"
+    description: |-
+      The version of Rust to install. If not specified, the latest stable version will be used.
+      The minimum supported version is `1.82.0`.
+
+    additional-versions:
+      required: false
+      default: ""
+      description: |-
+        Additional versions of Rust to install, separated by spaces. Example: `1.75 1.79`.
+
+    use-cache:
+      default: "true"
+      required: false
+      description: |-
+        Whether to use the cache for Rust toolchains and Cargo packages. If set to `false`, the cache will not be used.
+
+    certora-sbf-options:
+      required: false
+      default: ""
+      description: |-
+        Additional options to pass to the `cargo certora-sbf` command. This can be used to specify
+        additional flags or configurations for the Certora SBF tool. See https://github.com/Certora/cargo-certora-sbf
+        for more details on available options.
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/cache@v4
+      if: ${{ inputs.use-cache == 'true' }}
+      with:
+        path: |
+          ~/.cargo/bin/
+          ~/.cargo/registry/index/
+          ~/.cargo/registry/cache/
+          ~/.cargo/git/db/
+          target/
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - shell: bash
+      run: |
+        if ! command -v rustup &>/dev/null; then
+          curl -sSfL --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused https://sh.rustup.rs | sh -s -- --default-toolchain none -y
+        fi
+
+        . "$HOME/.cargo/env"
+
+        rustup toolchain install '${{ inputs.version }}' --profile minimal
+        cargo '+${{ inputs.version }}' install --list | grep -q cargo-certora-sbf || cargo '+${{ inputs.version }}' install cargo-certora-sbf
+
+        if [ -n '${{ inputs.additional-versions }}' ]; then
+          rustup toolchain install "${{ inputs.additional-versions }}" --profile minimal
+        fi
+
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+    - shell: bash
+      run: |
+        # Call certora-sbf command if CERTORA_SBF_BUILD is not set
+        if [ -z "${CERTORA_SBF_BUILD}" ]; then
+          cargo '+${{ inputs.version }}' certora-sbf --no-build ${{ inputs.certora-sbf-options }}
+          echo "CERTORA_SBF_BUILD=true" >> $GITHUB_ENV
+        fi
