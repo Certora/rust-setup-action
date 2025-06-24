@@ -60,7 +60,7 @@ runs:
           CERTORA_SBF_NAME="cargo-certora-sbf"
         fi
 
-        rustup toolchain install '${{ inputs.version }}' --profile minimal
+        rustup toolchain install '${{ inputs.version }}'
         rustup default '${{ inputs.version }}'
 
         cargo '+${{ inputs.version }}' install --list | grep -q cargo-certora-sbf || cargo '+${{ inputs.version }}' install "${CERTORA_SBF_NAME}"
