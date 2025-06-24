@@ -55,11 +55,12 @@ runs:
 
     - shell: bash
       run: |
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+        export PATH="$HOME/.cargo/bin:$PATH"
+
         if ! command -v rustup &>/dev/null; then
           curl -sSfL --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused https://sh.rustup.rs | sh -s -- --default-toolchain none -y
         fi
-
-        . "$HOME/.cargo/env"
 
         if [ -n '${{ inputs.certora-sbf-version }}' ]; then
           CERTORA_SBF_NAME="cargo-certora-sbf@${{ inputs.certora-sbf-version }}"
@@ -73,8 +74,6 @@ runs:
         if [ -n '${{ inputs.additional-versions }}' ]; then
           rustup toolchain install "${{ inputs.additional-versions }}" --profile minimal
         fi
-
-        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
     - shell: bash
       run: |
