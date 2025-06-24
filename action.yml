@@ -2,9 +2,6 @@
 name: Certora Rust Setup Action
 description: |-
   This GitHub Action sets up the Rust toolchain and installs the `cargo-certora-sbf` tool.
-  It allows you to specify the Rust version, additional versions, and options for the Certora SBF tool.
-  For more information, see https://github.com/Certora/cargo-certora-sbf and
-  https://docs.certora.com/en/latest/docs/solana/installation.html.
 
 branding:
   color: blue
