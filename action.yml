@@ -18,25 +18,25 @@ inputs:
       The version of Rust to install. If not specified, the latest stable version will be used.
       The minimum supported version is `1.82.0`.
 
-    additional-versions:
-      required: false
-      default: ""
-      description: |-
-        Additional versions of Rust to install, separated by spaces. Example: `1.75 1.79`.
+  additional-versions:
+    required: false
+    default: ""
+    description: |-
+      Additional versions of Rust to install, separated by spaces. Example: `1.75 1.79`.
 
-    certora-sbf-version:
-      required: false
-      default: ""
-      description: |-
-        The version of `cargo-certora-sbf` to install. If not specified, the latest version will be used.
+  certora-sbf-version:
+    required: false
+    default: ""
+    description: |-
+      The version of `cargo-certora-sbf` to install. If not specified, the latest version will be used.
 
-    certora-sbf-options:
-      required: false
-      default: ""
-      description: |-
-        Additional options to pass to the `cargo certora-sbf` command. This can be used to specify
-        additional flags or configurations for the Certora SBF tool. See https://github.com/Certora/cargo-certora-sbf
-        for more details on available options.
+  certora-sbf-options:
+    required: false
+    default: ""
+    description: |-
+      Additional options to pass to the `cargo certora-sbf` command. This can be used to specify
+      additional flags or configurations for the Certora SBF tool. See https://github.com/Certora/cargo-certora-sbf
+      for more details on available options.
 
 runs:
   using: composite
@@ -72,8 +72,7 @@ runs:
 
     - shell: bash
       run: |
-        # Call certora-sbf command if CERTORA_SBF_BUILD is not set
         if [ -z "${CERTORA_SBF_BUILD}" ]; then
-          cargo '+${{ inputs.version }}' certora-sbf --no-build ${{ inputs.certora-sbf-options }}
-          echo "CERTORA_SBF_BUILD=true" >> $GITHUB_ENV
+         cargo '+${{ inputs.version }}' certora-sbf --no-build ${{ inputs.certora-sbf-options }}
+         echo "CERTORA_SBF_BUILD=true" >> $GITHUB_ENV
         fi
